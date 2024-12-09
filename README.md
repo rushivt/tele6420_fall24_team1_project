@@ -31,12 +31,11 @@ This project demonstrates the automation of a highly available and scalable web 
 ## Project Structure
 
 ```plaintext
-├── terraform/
-│   ├── main.tf               # Main Terraform configuration file
-│   ├── variables.tf          # Variables for customization
-│   └── outputs.tf            # Output configurations
-├── ansible/
-│   ├── playbook.yml          # Ansible playbook for instance setup
-│   └── inventory             # Inventory file for Ansible
+├── part1/
+│   └── main.tf               # Main Terraform configuration file
+├── part2/
+│   ├── playbook-ami.yml      # Ansible playbook for instance setup
+│   ├── terraform.tfvars      # Variables file
+│   └── main.tf               # Main Terraform file for part 2
 ├── README.md                 # Project documentation
 └── screenshots/              # Screenshots for IaC steps
