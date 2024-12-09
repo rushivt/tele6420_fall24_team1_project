@@ -30,7 +30,7 @@
           yum install -y python3 python3-pip
           yum groupinstall -y "Development Tools"
           yum install -y python3-devel
-          pip3 install ansible flask flask-sqlalchemy flask-migrate mysql-connector-python pymysql
+          pip3 install ansible flask flask-sqlalchemy flask-migrate mysql-connector-python pymysql psutil
           yum install -y httpd
           systemctl start httpd
           systemctl enable httpd
@@ -40,6 +40,54 @@
           echo "RDS_DBNAME=mydb" >> /etc/environment
           echo "RDSHOST_NAME=localhost" >> /etc/environment
           source /etc/environment
+
+          # Create stress.py file in ec2-user's home directory
+          cat << 'EOF' > /home/ec2-user/stress.py
+          import psutil
+          import time
+          import multiprocessing
+          from multiprocessing import Process
+
+          def cpu_load():
+              while True:
+                  x = 1234 * 5678  # Simple calculation to create load
+
+          def monitor():
+              start_time = time.time()
+              while True:
+                  cpu_percent = psutil.cpu_percent(interval=1)
+                  print(f"CPU Usage: {cpu_percent}%")
+
+                  time.sleep(1500)
+                  
+                  if cpu_percent > 90:
+                      print("CPU usage exceeded 90%. Stopping...")
+                      return True
+                      
+                  if time.time() - start_time > 30:
+                      print("30 seconds completed")
+                      return False
+                    
+
+          if __name__ == '__main__':
+              # Start CPU load processes
+              processes = []
+              for _ in range(multiprocessing.cpu_count()):
+                  p = Process(target=cpu_load)
+                  p.start()
+                  processes.append(p)
+              
+              # Monitor CPU usage
+              should_terminate = monitor()
+              
+              # Terminate all processes
+              for p in processes:
+                  p.terminate()
+          EOF
+
+          # Set proper ownership and permissions
+          chown ec2-user:ec2-user /home/ec2-user/stress.py
+          chmod +x /home/ec2-user/stress.py
       register: ec2
 
     - name: Wait for user data script to complete
